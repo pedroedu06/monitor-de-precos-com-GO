@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pedroedu06/monitor-de-precos-com-GO/internal/controller"
+	"github.com/pedroedu06/monitor-de-precos-com-GO/internal/model/middleware"
 )
 
 func InitRoutes(r *gin.RouterGroup) {
@@ -10,6 +11,7 @@ func InitRoutes(r *gin.RouterGroup) {
 	r.POST("/auth", controller.AuthUser)
 
 	api := r.Group("/api")
+	api.Use(middleware.Auth())
 	{
 		api.POST("/produtos", controller.CreateProduct)
 		api.GET("/produtos", controller.ListProduct)
