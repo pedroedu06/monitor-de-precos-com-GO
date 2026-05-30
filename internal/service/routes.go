@@ -7,8 +7,7 @@ import (
 
 func InitRoutes(r *gin.RouterGroup) {
 	r.GET("/health", controller.Ping)
-	r.POST("/auth", controller.LoginUser)
-	r.POST("/usuarios", controller.CreateUser)
+	r.POST("/auth", controller.AuthUser)
 
 	api := r.Group("/api")
 	{

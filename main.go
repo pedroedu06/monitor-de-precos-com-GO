@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("Aviso: .env nao encontrado, usando variaveis de ambiente do sistema")
+		log.Println("Warning: .env not found, using system environment variables")
 	}
 
 	router := gin.Default()

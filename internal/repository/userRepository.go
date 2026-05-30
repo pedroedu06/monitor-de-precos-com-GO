@@ -30,3 +30,11 @@ func (r *UserRepository) Create(u model.UserDomain) (model.UserDomain, error) {
 	)
 	return s, err
 }
+
+func (r *UserRepository) FindByTelefone(telefone string) (model.UserDomain, error) {
+    query := `SELECT id, telefone, created_at FROM usuarios WHERE telefone = $1`
+    
+    var u model.UserDomain
+    err := r.db.QueryRow(query, telefone).Scan(&u.ID, &u.Telefone, &u.CreatedAt)
+    return u, err
+}

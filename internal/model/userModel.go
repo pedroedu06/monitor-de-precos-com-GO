@@ -14,10 +14,10 @@ type UserDomain struct {
 
 func (u *UserDomain) Validate() error {
 	if u.Telefone == "" {
-		return errors.New("telefone obrigatório")
+		return errors.New("phone is required")
 	}
 	if !strings.HasPrefix(u.Telefone, "+"){
-		return errors.New("Telefone deve ter o codigo do pais!")
+		return errors.New("phone must include the country code!")
 	}
 	return nil
 }

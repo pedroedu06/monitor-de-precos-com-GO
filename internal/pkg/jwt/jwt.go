@@ -10,7 +10,7 @@ import (
 func GetSecretKey() []byte {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		panic("chave nao encontrada!")
+		panic("secret key not found!")
 	}
 
 	return []byte(secret)
@@ -29,7 +29,7 @@ func GenerateToken(userID string) (string, error) {
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(GetSecretKey())
 }
 
