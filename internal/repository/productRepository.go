@@ -27,3 +27,60 @@ func (r *ProdutoRepository) Create(produto model.ProdutoDomain) (model.ProdutoDo
 	)
 	return p, err
 }
+
+func (r *ProdutoRepository) ListByUserID(userID string) ([]model.ProdutoDomain, error) {
+	query := `
+		SELECT id, usuario_id, url, preco_alvo, ativo
+		FROM produtos
+		WHERE usuario_id = $1
+	`
+	rows, err := r.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var produtos []model.ProdutoDomain
+	for rows.Next() {
+		var p model.ProdutoDomain
+		if err := rows.Scan(&p.ID, &p.UserID, &p.URL, &p.TargetPrice, &p.IsActive); err != nil {
+			return nil, err
+		}
+		produtos = append(produtos, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return produtos, nil
+}
+
+func (r *ProdutoRepository) DeleteProductById(id, userId string) (int64, error) {
+	query := `DELETE FROM produtos 
+		WHERE id = $1 AND usuario_id = $2`
+
+	result, err := r.db.Exec(query, id, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+    if err != nil {
+        return 0, err
+    }
+
+	return rowsAffected, nil
+}
+
+func (r *ProdutoRepository) SetActiveById(id, userID string, active bool) (model.ProdutoDomain, error) {
+	query := `
+		UPDATE produtos
+		SET ativo = $3
+		WHERE id = $1 AND usuario_id = $2
+		RETURNING id, usuario_id, url, preco_alvo, ativo
+	`
+	var p model.ProdutoDomain
+	err := r.db.QueryRow(query, id, userID, active).Scan(
+		&p.ID, &p.UserID, &p.URL, &p.TargetPrice, &p.IsActive,
+	)
+	return p, err
+}

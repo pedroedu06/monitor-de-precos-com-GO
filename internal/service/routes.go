@@ -16,7 +16,8 @@ func InitRoutes(r *gin.RouterGroup) {
 		api.POST("/produtos", controller.CreateProduct)
 		api.GET("/produtos", controller.ListProduct)
     	api.DELETE("/produtos/:id", controller.DeleteProduct)
-    	api.PATCH("/produtos/:id/pausar", controller.PauseProduct)
+    	api.PATCH("/produtos/:id/pause", controller.PauseProduct)
+    	api.PATCH("/produtos/:id/resume", controller.ResumeProduct)
     	api.GET("/produtos/:id/historico", controller.HistoricPrices)
     	api.GET("/notificacoes", controller.ListNotifications)
 	}

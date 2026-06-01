@@ -104,15 +104,67 @@ func CreateProduct(c *gin.Context) {
 }
 
 func ListProduct(c *gin.Context) {
+    userID := c.GetString("UserID")
 
+    repo := repository.NewProdutoRepository()
+    produtos, err := repo.ListByUserID(userID)
+    if err != nil {
+        restErr := resterr.NewInternalServerErr(
+            fmt.Sprintf("error listing products, error=%s", err.Error()))
+        c.JSON(restErr.Code, restErr)
+        return
+    }
+    c.JSON(200, produtos)
 }
 
 func DeleteProduct(c *gin.Context) {
+    id := c.Param("id")
+    userID := c.GetString("UserID")
 
+    repo := repository.NewProdutoRepository()
+    rowsAffected, err := repo.DeleteProductById(id, userID)
+    if err != nil {
+        restErr := resterr.NewInternalServerErr(
+            fmt.Sprintf("error deleting product, error=%s", err.Error()))
+        c.JSON(restErr.Code, restErr)
+        return
+    }
+    if rowsAffected == 0 {
+        restErr := resterr.NewNotFoundErr("Product not found")
+        c.JSON(restErr.Code, restErr)
+        return
+    }
+
+    c.JSON(200, gin.H{"mensage": "sucess"})
 }
 
 func PauseProduct(c *gin.Context) {
+    setProductActive(c, false)
+}
 
+func ResumeProduct(c *gin.Context) {
+    setProductActive(c, true)
+}
+
+func setProductActive(c *gin.Context, active bool) {
+    id := c.Param("id")
+    userID := c.GetString("UserID")
+
+    repo := repository.NewProdutoRepository()
+    product, err := repo.SetActiveById(id, userID, active)
+    if err == sql.ErrNoRows {
+        restErr := resterr.NewNotFoundErr("Product not found")
+        c.JSON(restErr.Code, restErr)
+        return
+    }
+    if err != nil {
+        restErr := resterr.NewInternalServerErr(
+            fmt.Sprintf("error updating product state, error=%s", err.Error()))
+        c.JSON(restErr.Code, restErr)
+        return
+    }
+
+    c.JSON(200, product)
 }
 
 func HistoricPrices(c *gin.Context) {
