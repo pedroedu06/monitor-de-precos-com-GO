@@ -168,7 +168,24 @@ func setProductActive(c *gin.Context, active bool) {
 }
 
 func HistoricPrices(c *gin.Context) {
+    productID := c.Param("id")
+    userID := c.GetString("UserID")
 
+    repo := repository.NewPriceHistoryRepository()
+    history, err := repo.ListByProductID(productID, userID)
+    if err != nil {
+        restErr := resterr.NewInternalServerErr(
+            fmt.Sprintf("error fetching price history, error=%s", err.Error()))
+        c.JSON(restErr.Code, restErr)
+        return
+    }
+
+    // Normalize nil to empty slice so the client always gets [] instead of null.
+    if history == nil {
+        history = []model.PriceHistoryDomain{}
+    }
+
+    c.JSON(200, history)
 }
 
 func ListNotifications(c *gin.Context) {
