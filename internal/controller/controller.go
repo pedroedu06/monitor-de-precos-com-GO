@@ -40,8 +40,7 @@ func AuthUser(c *gin.Context) {
     }
 
     repo := repository.NewUserReposity()
-
-    // novo — busca antes de criar
+    
     existingUser, err := repo.FindByTelefone(user.Telefone)
     if err == sql.ErrNoRows {
         existingUser, err = repo.Create(user)
@@ -189,5 +188,21 @@ func HistoricPrices(c *gin.Context) {
 }
 
 func ListNotifications(c *gin.Context) {
+    userID := c.GetString("UserID")
 
+    repo := repository.NewNotificationRepository()
+    notifications, err := repo.ListByUserID(userID)
+    if err != nil {
+        restErr := resterr.NewInternalServerErr(
+            fmt.Sprintf("error fetching notifications, error=%s", err.Error()))
+        c.JSON(restErr.Code, restErr)
+        return
+    }
+
+    // Normalize nil to empty slice so the client always gets [] instead of null.
+    if notifications == nil {
+        notifications = []model.NotificationDomain{}
+    }
+
+    c.JSON(200, notifications)
 }

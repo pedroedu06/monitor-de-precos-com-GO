@@ -54,6 +54,34 @@ func (r *ProdutoRepository) ListByUserID(userID string) ([]model.ProdutoDomain, 
 	return produtos, nil
 }
 
+// ListAllActive returns every active product across all users.
+// Used by the background worker to know which products to scrape.
+func (r *ProdutoRepository) ListAllActive() ([]model.ProdutoDomain, error) {
+	query := `
+		SELECT id, usuario_id, url, preco_alvo, ativo
+		FROM produtos
+		WHERE ativo = true
+	`
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var products []model.ProdutoDomain
+	for rows.Next() {
+		var p model.ProdutoDomain
+		if err := rows.Scan(&p.ID, &p.UserID, &p.URL, &p.TargetPrice, &p.IsActive); err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
 func (r *ProdutoRepository) DeleteProductById(id, userId string) (int64, error) {
 	query := `DELETE FROM produtos 
 		WHERE id = $1 AND usuario_id = $2`
